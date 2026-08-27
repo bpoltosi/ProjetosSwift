@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compilar Swift",
+            "type": "shell",
+            "command": "cmd.exe",
+            "args": [
+                "/c",
+                "\"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\Common7\\Tools\\VsDevCmd.bat\" -arch=x64 -host_arch=x64 && swiftc \"${file}\" -o \"${fileDirname}\\${fileBasenameNoExtension}.exe\""
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}

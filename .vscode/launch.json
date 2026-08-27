@@ -1,0 +1,43 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "name": "Launch Swift Executable",
+            "program": "${workspaceRoot}/.build/debug/<program>",
+            "args": [],
+            "env": {},
+            "cwd": "${workspaceRoot}"
+        },
+        {
+            "name": "Executar Swift",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
+            "cwd": "${fileDirname}",
+            "preLaunchTask": "Compilar Swift",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:ProjetosSwift}",
+            "name": "Debug ProjetosSwift",
+            "target": "ProjetosSwift",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug ProjetosSwift"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:ProjetosSwift}",
+            "name": "Release ProjetosSwift",
+            "target": "ProjetosSwift",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release ProjetosSwift"
+        }
+    ]
+}
