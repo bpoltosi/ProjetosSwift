@@ -19,7 +19,7 @@ struct ContentView: View {
         ItemLista(titulo: "Pincel - Rosa", icone: "paintbrush"),
         ItemLista(titulo: "Caneta - Azul", icone: "paintbrush.pointed"),
         ItemLista(titulo: "Palheta de Cores - Cinza", icone: "paintpalette"),
-        ItemLista(titulo: "Lista", icone: "line.3.horizontal")
+        ItemLista(titulo: "Lista", icone: paintpalette")
     ]
 
     var body: some View {
