@@ -2,6 +2,8 @@
 //  ContentView.swift
 //  Desafio HarryPotter
 //
+//  Created by Turma01-2 on 22/10/26.
+//
 
 import SwiftUI
 
@@ -52,7 +54,7 @@ struct ContentView: View {
                 .padding(.horizontal, 12)
                 .padding(.top, 8)
             }
-            .navigationTitle("Mundo Bruxo")
+            .navigationTitle("Personagens Hogwards")
             .navigationBarTitleDisplayMode(.large)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .task {
@@ -69,8 +71,10 @@ struct ContentView: View {
             Image(systemName: "line.3.horizontal.decrease.circle.fill")
                 .font(.title3)
                 .foregroundStyle(.yellow)
+            
+            Spacer()
 
-            Text("Casa")
+            Text("Exibicao por filtro:")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.9))
 
