@@ -8,7 +8,8 @@ private struct JogoTabuleiro: Decodable, Identifiable {
     let jogadoresMax: Int
     let duracaoMinutos: Int
     let idadeMinima: Int
-    let categoria: String
+    let categorias: [String]
+    var categoria: String { categorias.joined(separator: " · ") }
     let dificuldade: String
     let imagemURL: String
 
@@ -66,9 +67,9 @@ private struct JogoTabuleiro: Decodable, Identifiable {
         idadeMinima = try container.decode(Int.self, forKey: .idadeMinima)
 
         if let categoriaTexto = try? container.decode(String.self, forKey: .categoria) {
-            categoria = categoriaTexto
+            categorias = [categoriaTexto]
         } else {
-            categoria = try container.decode([String].self, forKey: .categoria).joined(separator: " e ")
+            categorias = try container.decode([String].self, forKey: .categoria)
         }
 
         dificuldade = try container.decode(String.self, forKey: .dificuldade)
@@ -77,7 +78,10 @@ private struct JogoTabuleiro: Decodable, Identifiable {
 }
 
 private enum JogosAPI {
-    static let endpoint = URL(string: "http://127.0.0.1:1880/getJogos")!
+    // No simulador, 127.0.0.1 aponta para o Mac. Em iPhone físico, use o IP
+    // local do computador que executa o Node-RED, por exemplo http://192.168.1.10:1880.
+    static let baseURL = URL(string: "http://127.0.0.1:1880")!
+    static let endpoint = baseURL.appendingPathComponent("getJogos")
 
     static func buscarJogos() async throws -> [JogoTabuleiro] {
         var request = URLRequest(url: endpoint)
@@ -126,7 +130,8 @@ struct ContentView: View {
 
     private var jogosFiltrados: [JogoTabuleiro] {
         jogos.filter { jogo in
-            let correspondeCategoria = categoriaSelecionada == "Todos" || jogo.categoria.localizedCaseInsensitiveContains(categoriaSelecionada)
+            let correspondeCategoria = categoriaSelecionada == "Todos" ||
+                jogo.categorias.contains { $0.localizedCaseInsensitiveContains(categoriaSelecionada) }
             let correspondeBusca = busca.isEmpty ||
                 jogo.nome.localizedCaseInsensitiveContains(busca) ||
                 jogo.categoria.localizedCaseInsensitiveContains(busca)
@@ -138,6 +143,22 @@ struct ContentView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
+                    if carregando {
+                        ProgressView("Carregando catálogo da API…")
+                            .frame(maxWidth: .infinity, minHeight: 120)
+                    } else if let erroAPI {
+                        ContentUnavailableView {
+                            Label("Não foi possível carregar os jogos", systemImage: "wifi.exclamationmark")
+                        } description: {
+                            Text(erroAPI)
+                        } actions: {
+                            Button("Tentar novamente") {
+                                Task { await carregarJogos() }
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                    }
+
                     cabecalho
                     campoBusca
                     filtroCategorias
@@ -184,6 +205,9 @@ struct ContentView: View {
             }
         }
         .tint(.indigo)
+        .task {
+            await carregarJogos()
+        }
     }
 
     private var cabecalho: some View {
@@ -279,14 +303,30 @@ struct ContentView: View {
         } label: {
             VStack(alignment: .leading, spacing: 12) {
                 ZStack(alignment: .topTrailing) {
-                    RoundedRectangle(cornerRadius: 15)
-                        .fill(jogo.cor.gradient)
-                        .frame(height: 112)
-                        .overlay {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 15)
+                            .fill(jogo.cor.gradient)
+                        if let url = URL(string: jogo.imagemURL), !jogo.imagemURL.isEmpty {
+                            AsyncImage(url: url) { phase in
+                                if let image = phase.image {
+                                    image.resizable().scaledToFill()
+                                } else {
+                                    Image(systemName: jogo.simbolo)
+                                        .font(.system(size: 42, weight: .medium))
+                                        .foregroundStyle(.white.opacity(0.95))
+                                }
+                            }
+                            .frame(height: 112)
+                            .frame(maxWidth: .infinity)
+                            .clipped()
+                        } else {
                             Image(systemName: jogo.simbolo)
                                 .font(.system(size: 42, weight: .medium))
                                 .foregroundStyle(.white.opacity(0.95))
                         }
+                    }
+                    .frame(height: 112)
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
 
                     Button {
                         alternarFavorito(jogo)
@@ -338,14 +378,29 @@ struct ContentView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    RoundedRectangle(cornerRadius: 24)
-                        .fill(jogo.cor.gradient)
-                        .frame(height: 180)
-                        .overlay {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 24)
+                            .fill(jogo.cor.gradient)
+                        if let url = URL(string: jogo.imagemURL), !jogo.imagemURL.isEmpty {
+                            AsyncImage(url: url) { phase in
+                                if let image = phase.image {
+                                    image.resizable().scaledToFit()
+                                } else {
+                                    Image(systemName: jogo.simbolo)
+                                        .font(.system(size: 72, weight: .medium))
+                                        .foregroundStyle(.white)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 180)
+                        } else {
                             Image(systemName: jogo.simbolo)
                                 .font(.system(size: 72, weight: .medium))
                                 .foregroundStyle(.white)
                         }
+                    }
+                    .frame(height: 180)
+                    .clipShape(RoundedRectangle(cornerRadius: 24))
 
                     Text(jogo.nome)
                         .font(.largeTitle.bold())
