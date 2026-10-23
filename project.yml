@@ -19,3 +19,5 @@ targets:
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
         TARGETED_DEVICE_FAMILY: "1,2"
         GENERATE_INFOPLIST_FILE: YES
+        # Troque pelo IP LAN real do servidor que executa o Node-RED.
+        INFOPLIST_KEY_API_BASE_URL: "http://192.168.1.50:1880"
