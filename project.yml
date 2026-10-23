@@ -1,0 +1,21 @@
+name: ProjetosSwift
+options:
+  bundleIdPrefix: br.com.bpoltosi
+  deploymentTarget:
+    iOS: "17.0"
+
+targets:
+  JogosTabuleiro:
+    type: application
+    platform: iOS
+    sources:
+      - path: hackatruck/presencial/semana02/Desafio05/ContentView.swift
+      - path: hackatruck/presencial/semana02/Desafio05/Jogos_TabuleiroApp.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: br.com.bpoltosi.JogosTabuleiro
+        PRODUCT_NAME: Jogos de Tabuleiro
+        SWIFT_VERSION: "5.0"
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        GENERATE_INFOPLIST_FILE: YES
