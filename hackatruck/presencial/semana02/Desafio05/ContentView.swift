@@ -1,15 +1,103 @@
 import SwiftUI
 
-private struct JogoTabuleiro: Identifiable {
-    let id = UUID()
+private struct JogoTabuleiro: Decodable, Identifiable {
+    let id: Int
     let nome: String
-    let categoria: String
-    let jogadores: String
-    let duracao: String
-    let dificuldade: String
     let descricao: String
-    let simbolo: String
-    let cor: Color
+    let jogadoresMin: Int
+    let jogadoresMax: Int
+    let duracaoMinutos: Int
+    let idadeMinima: Int
+    let categoria: String
+    let dificuldade: String
+    let imagemURL: String
+
+    var jogadores: String {
+        jogadoresMin == jogadoresMax
+            ? "\\(jogadoresMin) jogador\\(jogadoresMin == 1 ? "" : "es")"
+            : "\\(jogadoresMin)–\\(jogadoresMax) jogadores"
+    }
+
+    var duracao: String { "\\(duracaoMinutos) min" }
+
+    var simbolo: String {
+        switch id {
+        case 1: return "hexagon.fill"
+        case 2: return "tram.fill"
+        case 3: return "sparkles"
+        case 4: return "cross.case.fill"
+        case 5: return "rectangle.stack.fill"
+        case 6: return "crown.fill"
+        case 7: return "map.fill"
+        case 8: return "square.grid.3x3.fill"
+        case 9: return "person.3.fill"
+        default: return "diamond.fill"
+        }
+    }
+
+    var cor: Color {
+        switch id {
+        case 1: return .orange
+        case 2: return .blue
+        case 3: return .purple
+        case 4: return .green
+        case 5: return .red
+        case 6: return .brown
+        case 7: return .mint
+        case 8: return .cyan
+        case 9: return .indigo
+        default: return .pink
+        }
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, nome, descricao, jogadoresMin, jogadoresMax
+        case duracaoMinutos, idadeMinima, categoria, dificuldade, imagemURL
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(Int.self, forKey: .id)
+        nome = try container.decode(String.self, forKey: .nome)
+        descricao = try container.decode(String.self, forKey: .descricao)
+        jogadoresMin = try container.decode(Int.self, forKey: .jogadoresMin)
+        jogadoresMax = try container.decode(Int.self, forKey: .jogadoresMax)
+        duracaoMinutos = try container.decode(Int.self, forKey: .duracaoMinutos)
+        idadeMinima = try container.decode(Int.self, forKey: .idadeMinima)
+
+        if let categoriaTexto = try? container.decode(String.self, forKey: .categoria) {
+            categoria = categoriaTexto
+        } else {
+            categoria = try container.decode([String].self, forKey: .categoria).joined(separator: " e ")
+        }
+
+        dificuldade = try container.decode(String.self, forKey: .dificuldade)
+        imagemURL = try container.decodeIfPresent(String.self, forKey: .imagemURL) ?? ""
+    }
+}
+
+private enum JogosAPI {
+    static let endpoint = URL(string: "http://127.0.0.1:1880/getJogos")!
+
+    static func buscarJogos() async throws -> [JogoTabuleiro] {
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+
+        let decoder = JSONDecoder()
+        if let array = try? decoder.decode([JogoTabuleiro].self, from: data) {
+            return array.sorted { $0.id < $1.id }
+        }
+
+        let objeto = try decoder.decode([String: JogoTabuleiro].self, from: data)
+        return objeto.values.sorted { $0.id < $1.id }
+    }
 }
 
 struct ContentView: View {
@@ -18,74 +106,27 @@ struct ContentView: View {
     @State private var favoritos: Set<String> = []
     @State private var jogoSelecionado: JogoTabuleiro?
 
-    private let categorias = ["Todos", "Estratégia", "Família", "Cartas", "Cooperativo"]
+    private let categorias = ["Todos", "Estratégia", "Negociação", "Família", "Rotas", "Criatividade", "Dedução", "Cooperativo", "Cartas", "Clássico", "Colocação de peças", "Abstrato", "Palavras", "Equipes", "Gestão de recursos"]
 
-    private let jogos: [JogoTabuleiro] = [
-        JogoTabuleiro(
-            nome: "Catan",
-            categoria: "Estratégia",
-            jogadores: "3–4 jogadores",
-            duracao: "60–90 min",
-            dificuldade: "Média",
-            descricao: "Construa povoados, estradas e cidades, troque recursos e expanda sua presença na ilha.",
-            simbolo: "hexagon.fill",
-            cor: .orange
-        ),
-        JogoTabuleiro(
-            nome: "Ticket to Ride",
-            categoria: "Família",
-            jogadores: "2–5 jogadores",
-            duracao: "30–60 min",
-            dificuldade: "Fácil",
-            descricao: "Conecte cidades com rotas ferroviárias e cumpra seus objetivos antes dos outros jogadores.",
-            simbolo: "tram.fill",
-            cor: .blue
-        ),
-        JogoTabuleiro(
-            nome: "Dixit",
-            categoria: "Família",
-            jogadores: "3–8 jogadores",
-            duracao: "30 min",
-            dificuldade: "Fácil",
-            descricao: "Use a imaginação para dar pistas sobre cartas ilustradas sem revelar tudo aos demais.",
-            simbolo: "sparkles",
-            cor: .purple
-        ),
-        JogoTabuleiro(
-            nome: "Pandemic",
-            categoria: "Cooperativo",
-            jogadores: "2–4 jogadores",
-            duracao: "45 min",
-            dificuldade: "Média",
-            descricao: "Trabalhe em equipe, viaje pelo mundo e encontre curas para conter surtos de doenças.",
-            simbolo: "cross.case.fill",
-            cor: .green
-        ),
-        JogoTabuleiro(
-            nome: "UNO",
-            categoria: "Cartas",
-            jogadores: "2–10 jogadores",
-            duracao: "15–30 min",
-            dificuldade: "Fácil",
-            descricao: "Combine cores e números, use cartas especiais e seja o primeiro a ficar sem cartas.",
-            simbolo: "rectangle.stack.fill",
-            cor: .red
-        ),
-        JogoTabuleiro(
-            nome: "Xadrez",
-            categoria: "Estratégia",
-            jogadores: "2 jogadores",
-            duracao: "10–60 min",
-            dificuldade: "Desafiadora",
-            descricao: "Planeje cada movimento, proteja seu rei e tente dar xeque-mate no adversário.",
-            simbolo: "crown.fill",
-            cor: .brown
-        )
-    ]
+    @State private var jogos: [JogoTabuleiro] = []
+    @State private var carregando = true
+    @State private var erroAPI: String?
+
+    @MainActor
+    private func carregarJogos() async {
+        carregando = true
+        erroAPI = nil
+        do {
+            jogos = try await JogosAPI.buscarJogos()
+        } catch {
+            erroAPI = "Verifica se o Node-RED está ativo e se GET /getJogos devolve JSON válido. Detalhe: \\(error.localizedDescription)"
+        }
+        carregando = false
+    }
 
     private var jogosFiltrados: [JogoTabuleiro] {
         jogos.filter { jogo in
-            let correspondeCategoria = categoriaSelecionada == "Todos" || jogo.categoria == categoriaSelecionada
+            let correspondeCategoria = categoriaSelecionada == "Todos" || jogo.categoria.localizedCaseInsensitiveContains(categoriaSelecionada)
             let correspondeBusca = busca.isEmpty ||
                 jogo.nome.localizedCaseInsensitiveContains(busca) ||
                 jogo.categoria.localizedCaseInsensitiveContains(busca)
