@@ -77,6 +77,25 @@ private struct JogoTabuleiro: Decodable, Identifiable {
     }
 }
 
+private struct RespostaJogos: Decodable {
+    let jogos: [JogoTabuleiro]
+
+    enum CodingKeys: String, CodingKey {
+        case jogos
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        if let array = try? container.decode([JogoTabuleiro].self, forKey: .jogos) {
+            jogos = array
+        } else {
+            let objeto = try container.decode([String: JogoTabuleiro].self, forKey: .jogos)
+            jogos = Array(objeto.values)
+        }
+    }
+}
+
 private enum JogosAPI {
     // No simulador, 127.0.0.1 aponta para o Mac. Em iPhone físico, use o IP
     // local do computador que executa o Node-RED, por exemplo http://192.168.1.10:1880.
@@ -89,14 +108,27 @@ private enum JogosAPI {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
         let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
+        guard let httpResponse = response as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw NSError(
+                domain: "JogosAPI",
+                code: httpResponse.statusCode,
+                userInfo: [NSLocalizedDescriptionKey: "A API respondeu com HTTP \(httpResponse.statusCode)."]
+            )
         }
 
         let decoder = JSONDecoder()
+
+        // Aceita os formatos mais comuns: [ {...} ], { "1": {...} } ou
+        // { "jogos": [ {...} ] } / { "jogos": { "1": {...} } }.
         if let array = try? decoder.decode([JogoTabuleiro].self, from: data) {
             return array.sorted { $0.id < $1.id }
+        }
+
+        if let envelope = try? decoder.decode(RespostaJogos.self, from: data) {
+            return envelope.jogos.sorted { $0.id < $1.id }
         }
 
         let objeto = try decoder.decode([String: JogoTabuleiro].self, from: data)
