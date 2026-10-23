@@ -14,11 +14,11 @@ private struct JogoTabuleiro: Decodable, Identifiable {
 
     var jogadores: String {
         jogadoresMin == jogadoresMax
-            ? "\\(jogadoresMin) jogador\\(jogadoresMin == 1 ? "" : "es")"
-            : "\\(jogadoresMin)–\\(jogadoresMax) jogadores"
+            ? "\(jogadoresMin) jogador\(jogadoresMin == 1 ? "" : "es")"
+            : "\(jogadoresMin)–\(jogadoresMax) jogadores"
     }
 
-    var duracao: String { "\\(duracaoMinutos) min" }
+    var duracao: String { "\(duracaoMinutos) min" }
 
     var simbolo: String {
         switch id {
@@ -119,7 +119,7 @@ struct ContentView: View {
         do {
             jogos = try await JogosAPI.buscarJogos()
         } catch {
-            erroAPI = "Verifica se o Node-RED está ativo e se GET /getJogos devolve JSON válido. Detalhe: \\(error.localizedDescription)"
+            erroAPI = "Verifica se o Node-RED está ativo e se GET /getJogos devolve JSON válido. Detalhe: \(error.localizedDescription)"
         }
         carregando = false
     }
