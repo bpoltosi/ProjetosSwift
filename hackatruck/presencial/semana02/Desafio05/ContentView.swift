@@ -177,10 +177,10 @@ struct ContentView: View {
                             .foregroundStyle(.secondary)
                     }
 
-                    if jogosFiltrados.isEmpty {
+                    if !carregando && erroAPI == nil && jogosFiltrados.isEmpty {
                         ContentUnavailableView.search(text: busca)
                             .frame(maxWidth: .infinity, minHeight: 220)
-                    } else {
+                    } else if !jogosFiltrados.isEmpty {
                         LazyVGrid(
                             columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)],
                             spacing: 14
