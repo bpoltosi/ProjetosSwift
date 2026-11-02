@@ -1,42 +1,37 @@
 # ProjetosSwift
 
-Repositório de estudos e exercícios desenvolvidos em **Swift**.
+Repositório de estudos, exercícios e desafios desenvolvidos em **Swift**, com foco em fundamentos da linguagem, interfaces SwiftUI, consumo de APIs e integração com dispositivos.
 
-O projeto utiliza **Swift Package Manager** e reúne atividades práticas utilizadas para estudar fundamentos da linguagem e programação orientada a objetos.
+## Organização
 
-## 🎯 Objetivos
-- Praticar a sintaxe e os fundamentos de Swift.
-- Desenvolver raciocínio lógico utilizando a linguagem.
-- Estudar conceitos de Programação Orientada a Objetos.
-- Registrar exercícios e experimentos realizados durante os estudos.
+- `Package.swift`, `Sources/` e `Tests/` — pacote Swift Package Manager e estrutura de testes.
+- `hackatruck/hackatruck-ead/` — exercícios introdutórios de Swift.
+- `hackatruck/presencial/semana01/` — primeiros desafios presenciais, incluindo interfaces e entradas do usuário.
+- `hackatruck/presencial/semana02/` — desafios de navegação, listas, mapas, APIs REST, CRUD, sensores e integração com IoT.
 
-## 📚 Conteúdos
-- Variáveis e tipos
-- Estruturas de controle
-- Funções
-- Classes e objetos
-- Propriedades e métodos
-- Organização em módulos
-- Testes automatizados com Swift Testing
+## Projetos e temas presentes
 
-## 📁 Estrutura
-- `Package.swift` — configuração do pacote Swift.
-- `hackatruck-ead/` — exercícios desenvolvidos durante os estudos.
-- `Tests/` — testes do pacote.
+- Interfaces declarativas com SwiftUI.
+- Navegação, listas, mapas e localização.
+- Consumo de API REST e organização em Model, Service e ViewModel.
+- Catálogo de jogos de tabuleiro e operações de dados.
+- Leitura de sensor de umidade e comunicação via WebSocket/API.
+- Aplicação de cardápio com operações de consulta, criação, atualização e exclusão.
+- Exemplos de integração entre aplicativo e código para Arduino.
 
-## ▶️ Executando
-Com uma instalação compatível do Swift:
+Cada desafio possui arquivos e instruções próprias; consulte o README do respectivo diretório quando disponível.
 
-    swift build
+## Executar
 
-Para executar os testes:
+Para os projetos Swift Package Manager na raiz, com Swift instalado:
 
-    swift test
+```bash
+swift build
+swift test
+```
 
-## 🧪 Testes
-O projeto possui uma estrutura de testes utilizando o framework **Swift Testing**, permitindo adicionar verificações automatizadas conforme as funcionalidades evoluem.
+Os desafios SwiftUI presenciais são projetos de aplicativo independentes e devem ser abertos em ambiente Apple compatível, normalmente pelo Xcode. Os exemplos de IoT também podem exigir placa, firmware, rede local e serviços externos.
 
-## 🚧 Status
-**Em desenvolvimento contínuo.**
+## Status
 
-Este repositório é parte do meu processo de aprendizagem em Swift e serve como registro da evolução prática na linguagem.
+Repositório de aprendizagem em evolução. Os desafios documentam atividades e protótipos; a presença de código não significa que todos os fluxos estejam integrados ou validados em hardware real.
