@@ -11,7 +11,7 @@ import Vision
 
 struct ContentView: View {
     // Conjunto de imagens disponíveis no Assets
-    let imageNames = ["barco1", "barco2", "barco3"]
+    let imageNames = ["imagem1", "imagem2", "imagem3", "imagem4", "imagem5", "imagem6"]
     
     // Controle de estado para navegação e resultado
     @State private var currentIndex = 0
