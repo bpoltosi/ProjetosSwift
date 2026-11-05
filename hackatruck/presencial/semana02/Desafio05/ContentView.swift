@@ -97,9 +97,12 @@ private struct RespostaJogos: Decodable {
 }
 
 private enum JogosAPI {
-    // No simulador, 127.0.0.1 aponta para o Mac. Em iPhone físico, use o IP
-    // local do computador que executa o Node-RED, por exemplo http://192.168.1.10:1880.
-    static let baseURL = URL(string: "http://127.0.0.1:1880")!
+    // Configure API_BASE_URL em project.yml com o endereço do host Docker.
+    // 127.0.0.1 é apenas fallback local; em um iPhone físico aponta para o próprio iPhone.
+    static let baseURL = URL(
+        string: Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String
+            ?? "http://127.0.0.1:1880"
+    )!
     static let endpoint = baseURL.appendingPathComponent("getJogos")
 
     static func buscarJogos() async throws -> [JogoTabuleiro] {

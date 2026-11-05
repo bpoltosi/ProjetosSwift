@@ -1,0 +1,50 @@
+name: iOS - build SwiftUI
+
+on:
+  push:
+    branches: [main, setup/windows-swiftui-workflow]
+    paths:
+      - "project.yml"
+      - "hackatruck/presencial/semana02/Desafio05/**"
+      - ".github/workflows/ios-build.yml"
+  pull_request:
+    paths:
+      - "project.yml"
+      - "hackatruck/presencial/semana02/Desafio05/**"
+      - ".github/workflows/ios-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-ios:
+    name: Compilar app iOS no simulador
+    runs-on: macos-15
+    timeout-minutes: 20
+
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Instalar XcodeGen
+        run: brew install xcodegen
+
+      - name: Gerar projeto Xcode
+        run: xcodegen generate --spec project.yml
+
+      - name: Mostrar ambiente
+        run: |
+          xcodebuild -version
+          xcodebuild -list -project ProjetosSwift.xcodeproj
+
+      - name: Compilar SwiftUI para iOS Simulator
+        run: |
+          xcodebuild \
+            -project ProjetosSwift.xcodeproj \
+            -scheme JogosTabuleiro \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
